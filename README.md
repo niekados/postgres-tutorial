@@ -288,3 +288,36 @@ with db.connect() as connection:
     for result in results:
         print(result)
 ```
+- query #2, where we select only the "Name" column from our Artist table.
+Remember to comment-out the previous query each time, since we're re-using the variable
+'`select_query`' for consistency.
+It's going to be exactly the same, but this time we can use the `.with_only_columns()` method.
+Even if we want to grab results from a single column, we need to wrap the column selection inside of a list.
+Also, using dot-nation, we need to use "`.c`" in our selection, which will identify a specific
+column header on the table.
+```python
+    # Query 2 - select only the "Name" column from the "Artist" table
+    select_query = artist_table.select().with_only_columns([artist_table.c.Name])
+```
+- query #3, we want to find just the Artist name of "Queen".
+Again, we're selecting from the `artist_table`, but this time we need to use the `.where()`
+method, and from the Name column, looking for only "Queen".
+```python
+    # Query 3 - select only 'Queen' from the "Artist" table
+    select_query = artist_table.select().where(artist_table.c.Name == "Queen")
+```
+- query #4, it's quite similar, but this time we just want the ArtistId of 51.
+```python
+    # Query 4 - select only by "ArtistId" #51 from the "Artist" table
+    select_query = artist_table.select().where(artist_table.c.ArtistId == 51)
+```
+- query #5, again, it's quite similar, but this time we're looking within the album_table.
+```python
+    # Query 5 - select only the albums with 'ArtistId' #51 on the "Album" table
+    select_query = album_table.select().where(album_table.c.ArtistId == 51)
+```
+- query # 6
+```python
+    # Query 6 - select all tracks where the composer is 'Queen' from the "Track" table
+    select_query = track_table.select().where(track_table.c.Composer == "Queen")
+```
