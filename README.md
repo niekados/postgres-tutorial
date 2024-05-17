@@ -166,11 +166,11 @@ objects.*
 ## SQL Alchemy
 SQLAlchemy library comes with three different layers of abstraction, meaning
 you can choose the level of support necessary for your applications.
-The lowest layer of abstraction is to simply use SQLAlchemy's engine component in order
+- The lowest layer of abstraction is to simply use SQLAlchemy's engine component in order
 to execute raw SQL, nothing too complex or fancy.
-The middle layer of abstraction uses SQLAlchemy's Expression Language to build SQL statements
+- The middle layer of abstraction uses SQLAlchemy's Expression Language to build SQL statements
 in a more Pythonic way, instead of relying purely on those raw strings.
-The highest layer of abstraction uses SQLAlchemy's full ORM capabilities, allowing us to make
+- The highest layer of abstraction uses SQLAlchemy's full ORM capabilities, allowing us to make
 use of Python classes and objects, instead of using database tables and connections.
 With each level of abstraction, you, as a user, are moved further away from writing
 raw SQL, and using more Python.
@@ -178,4 +178,113 @@ raw SQL, and using more Python.
 ### Installation SQL Alchemy package for python
 
 1. `pip3 install sqlalchemy==1.4.46` for this project. Otherwise we could use `pip3 install SQLAlchemy`
-2. 
+
+
+## SQL Expression Language (SQL Alchemy middle layer)
+
+1. Create new file `touch sql-expression.py`
+2. import a few classes from
+within the sqlalchemy module:
+```python
+from sqlalchemy import (
+    create_engine, Table, Column, Float, ForeignKey, Integer, String, MetaData
+)
+```
+3. Next, we need to link our Python file to our Chinook database, and that's where the '`create_engine`'
+component comes into play.
+I'm going to assign this to a variable of "`db`" to represent our database, and using
+`create_engine`, we can tell it to point to our local Chinook database within our Postgres server.
+*The fact that we have 3 slashes here, signifies that our database is hosted locally within
+our workspace environment.*
+```python
+# executing the instructions from our localhost "chinook" db
+db = create_engine("postgresql:///chinook")
+```
+4. We need to use the `MetaData` class, which we can save to a variable name of '`meta`'.
+The `MetaData` class will contain a collection of our table objects, and the associated data within those objects.
+Essentially, it's recursive data about data, meaning the data about our tables, and the data about the data in those tables; how very meta!
+```python
+meta = MetaData(db)
+```
+
+5. *We need to construct our tables, so that Python knows the schema that we're working with.
+Sometimes you'll hear this referred to as data models, which we'll cover a bit more in detail later on the lessons.
+For the purposes of this video, we will continue with tradition, and perform the same six queries from Chinook that we've done previously:*
+
+- Our first table class, or model, will be for the Artist table, which I'll assign to the variable of '`artist_table`'.
+Using the `Table import`, we need to specify the name of our table, and provide the meta schema.
+Now, all that's left to do is provide a breakdown of each of the columns within this table.
+*Similar to our psycopg2 lessons, I'm going to split my Terminal into two once more, but
+you're not required to do this part.
+The reason for this is to demonstrate the raw SQL commands once again, and compare to
+our SQLAlchemy Expression Language file we're currently building.
+The quickest way to see the list of column headers on a table, is by simply returning
+false, which intentionally gives us zero results.
+As you can see, from the Artist table, we have two columns; "ArtistId", which you might
+recall as being our primary key, and "Name".*
+Back within our file, **the format when defining columns, is the column name, followed by the
+type of data presented, and then any other optional fields after that.**
+In our case, we have a column for "`ArtistId`", which is an `Integer`, and for this one, we
+can specify that `primary_key` is set to `True`.
+The next column is for "`Name`", and this is simply just a `String`, with no other values necessary. 
+```python
+# create variable for "Artist" table
+artist_table = Table(
+    "Artist", meta,
+    Column("ArtistId", Integer, primary_key=True),
+    Column("Name", String)
+)
+```
+- Album table `album_table = Table`, and the name of the actual table from our database is `"Album"`.
+`AlbumId` is an `Integer`, and is, of course, our `primary key`.
+`Title` is just a `String`.
+Then, we have `ArtistId` as an `Integer`, but this time, since this is the Album table,
+it will not act as our primary key, but instead, as a Foreign Key.
+With the `ForeignKey`, we need to tell it which table and key to point to, so in this case,
+it's `artist_table.ArtistId`, using the table defined above.
+```python
+# create variable for "Album" table
+album_table = Table(
+    "Album", meta,
+    Column("AlbumId", Integer, primary_key=True),
+    Column("Title", String),
+    Column("ArtistId", Integer, ForeignKey("artist_table.ArtistId"))
+)
+```
+- Our final table is the Track table.
+This table will be `track_table` as our variable, using "`Track`" for the table name. `TrackId`, an I`nteger`, which is our primary key. Name, which is a `String`. `AlbumId`, an `Integer`, which is our `ForeignKey` pointing to the `album_table.AlbumId` from above. `MediaTypeId`, an `Integer`, which is technically a foreign key as well, but for these lessons, we aren't defining all tables, just those that we need, so we can simply set `primary_key `to `False`. `GenreId`, an `Integer`, and again, technically it's a foreign key, but we'll just set it to `False` as the primary key. `Composer`, which is a `String`. `Milliseconds`, an `Integer`. `Bytes`, another `Integer`. And finally, `UnitPrice`, which is a `Float`, since it uses decimal values for the price.
+```python
+# create variable for "Track" table
+track_table = Table(
+    "Track", meta,
+    Column("TrackId", Integer, primary_key=True),
+    Column("Name", String),
+    Column("AlbumId", Integer, ForeignKey("album_table.AlbumId")),
+    Column("MediaTypeId", Integer, primary_key=False),
+    Column("GenreId", Integer, primary_key=False),
+    Column("Composer", String),
+    Column("Milliseconds", Integer),
+    Column("Bytes", Integer),
+    Column("UnitPrice", Float)
+)
+```
+6. Now, we need to actually connect to the database, using the `.connect()` method, and the Python `with` - statement.
+This saves our connection to the database into a variable called '`connection`'. within the "`with`-statement", we'll start
+with the first query. 
+- Query #1 is to select all records from the Artist table.
+Using the Expression Language, all we need to do is apply the `.select()` method onto our table.
+Now all that's left to do, is run this query using the `.execute()` method from our database connection.
+We're going to store the query results into a variable called "`results`", that way we can
+iterate over each result found, and print it to the Terminal.
+For each result in our results list, print the result.
+```python
+# making the connection
+with db.connect() as connection:
+    
+    # Query 1 - select all records from the "Artist" table
+    select_query = artist_table.select()
+
+    results = connection.execute(select_query)
+    for result in results:
+        print(result)
+```
