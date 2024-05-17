@@ -144,7 +144,7 @@ double quotes just won't work. We need to use a Python string placeholder, and t
 to be, and each placeholder would be added to this list. Technically, since we know there should only be one result, we could use the `.fetchone()` method. This would print each column individually, instead of part of a tuple of column results. Save the file and let's run the same command to print our results.
 ```python
 # Query 3 - select only "Queen" from "Artist" table
-# cursor.execute('SELECT * FROM "Artist" WHERE "Name" = %s', ["Queen"])
+cursor.execute('SELECT * FROM "Artist" WHERE "Name" = %s', ["Queen"])
 
 # fetch the result (single)
 results = cursor.fetchone()
@@ -153,3 +153,29 @@ results = cursor.fetchone()
 # 51
 # Queen
 ```
+
+## ORM 
+
+*The letters ORM stand for "object-relational mapping".
+An ORM is essentially a way for you to query and manipulate data from your database, using
+objects.* 
+- **O** - Object; exactly as it sounds, the 'object' that you're using from the programming language, which is Python in our case.
+- **R** - Relational; this is the database piece of the puzzle, a relational database, which is Postgres in our case. 
+- **M** - Mapping; finally, this is effectively the bridge between your Python object, and your tables within the database, mapping the two together.
+
+## SQL Alchemy
+SQLAlchemy library comes with three different layers of abstraction, meaning
+you can choose the level of support necessary for your applications.
+The lowest layer of abstraction is to simply use SQLAlchemy's engine component in order
+to execute raw SQL, nothing too complex or fancy.
+The middle layer of abstraction uses SQLAlchemy's Expression Language to build SQL statements
+in a more Pythonic way, instead of relying purely on those raw strings.
+The highest layer of abstraction uses SQLAlchemy's full ORM capabilities, allowing us to make
+use of Python classes and objects, instead of using database tables and connections.
+With each level of abstraction, you, as a user, are moved further away from writing
+raw SQL, and using more Python.
+
+### Installation SQL Alchemy package for python
+
+1. `pip3 install sqlalchemy==1.4.46` for this project. Otherwise we could use `pip3 install SQLAlchemy`
+2. 
