@@ -144,7 +144,7 @@ double quotes just won't work. We need to use a Python string placeholder, and t
 to be, and each placeholder would be added to this list. Technically, since we know there should only be one result, we could use the `.fetchone()` method. This would print each column individually, instead of part of a tuple of column results. Save the file and let's run the same command to print our results.
 ```python
 # Query 3 - select only "Queen" from "Artist" table
-cursor.execute('SELECT * FROM "Artist" WHERE "Name" = %s', ["Queen"])
+# cursor.execute('SELECT * FROM "Artist" WHERE "Name" = %s', ["Queen"])
 
 # fetch the result (single)
 results = cursor.fetchone()

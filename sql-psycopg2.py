@@ -29,6 +29,7 @@ cursor.execute('SELECT * FROM "Artist" WHERE "Name" = %s', ["Queen"])
 # Query 6 - select all tracks where the composer is "Queen" from the "Track" table
 cursor.execute('SELECT * FROM "Track" WHERE "Composer" = %s', ["Queen"])
 
+
 # fetch the results (multiple)
 results = cursor.fetchall()
 
