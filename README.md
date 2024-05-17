@@ -55,3 +55,101 @@ still work if you include them.
 - `SELECT * FROM "Album" WHERE "ArtistId" = 51;` perform the same exact query one more time, but instead of looking within the Artist table, look at the Album table.
 - `SELECT * FROM "Track" WHERE "Composer" = 'Queen';` look within the table called "Track", and use the
 column header of "Composer" to search for all tracks by Queen.
+
+## Installin psycopg2 and wiring it with Python
+
+PsycoPG2 is by far the most popular, and stable library for connecting Python to Postgres.
+
+- To install it into our workspace.
+`pip3 install psycopg2`
+- Create a new Python file `touch sql-psycopg2.py`. (*It's important to note that you shouldn't call your file psycopg2.py, as this is a default
+file already used by the package, and will cause your queries to always fail.*)
+- first thing that we need to do now, is to '`import psycopg2`' at the top of our file.
+```python
+import psycopg2
+```
+- Then, we need to have psycopg2 connect to our Postgres database called Chinook, using
+the `.connect()` method, and we'll assign that to a variable of '`connection`'.
+We are only specifying the name of our database, `"chinook"`, **in double-quotes**, but you could
+include additional connection values such as `host`, `username`, `password`, and so on.
+```python
+# Connect to "chinook" database
+connection = psycopg2.connect(database="chinook")
+```
+- Next, our connection needs an instance of a Cursor Object. A cursor object is another way of saying a 'set' or 'list', similar to an 'array' in JavaScript.
+Essentially, anything that we query from the database will become part of this cursor object,
+and to read that data, we should iterate over the cursor using a for-loop, as an example.
+```python
+# Build a cursor object of the database
+cursor = connection.cursor()
+```
+- we need to set up a way for our data to be retrieved, or fetched, from the cursor.
+Assign this to a variable of '`results`' since it'll fetch any result that gets queried.
+*Please note, if we need to query multiple records from our database, we should use the*
+`.fetchall()` *method*.
+*Otherwise, if we're intentionally looking for one particular record, we could use the*
+`.fetchone()` *method, which I will comment-out for now using the CTRL+/ command*.
+```python 
+# fetch the results (multiple)
+results = cursor.fetchall()
+
+# EXASMPLE of fetching single result
+# fetch the result (single)
+# results = cursor.fetchone()
+```
+- Next, once our results have been fetched, we need to end the connection to the database,
+so the connection isn't always persistent.
+```python
+# Close the connection
+connection.close()
+```
+- In order to retrieve each record individually, we need to iterate over the results using a for-loop.
+For each individual result in the results list, print the result.
+```python
+# Print results
+for result in results:
+    print(result)
+```
+- After our cursor variable is defined, but before our results are fetched, we need to
+perform our queries using the `.execute()` method.
+Query #1 that we tested in the last video, was to simply select all records from the "Artist" table.
+PsycoPG2 commands are actually quite similar to native SQL commands, with one little twist;
+the precise use of quotations. **It's extremely important to note that we absolutely MUST use single-quotes to wrap our query, and double-quotes to specify particular values.**
+```python
+# Connect to "chinook" database
+connection = psycopg2.connect(database="chinook")
+
+# Build a cursor object of the database
+cursor = connection.cursor()
+
+# QUERY 1 - select all records from the "Artist" table .
+# MUST use single qoutes to wrap querry and double qoutes to specify particular values
+cursor.execute('SELECT * FROM "Artist"')
+
+# fetch the results (multiple)
+results = cursor.fetchall()
+
+# output:
+# ('Michele Campanella',)
+# ('Gerald Moore',)
+# ('Mela Tenenbaum, Pro Musica Prague & Richard Kapp',)
+# ('Emerson String Quartet',)
+# ('C. Monteverdi, Nigel Rogers - Chiaroscuro; London Baroque; London Cornett & Sackbu',)
+# ('Nash Ensemble',)
+# ('Philip Glass Ensemble',)
+```
+-  Query #3, we're searching for only "Queen" from the Artist table.
+Since we need to specify a particular record, **unfortunately any combination of single or
+double quotes just won't work. We need to use a Python string placeholder, and then define the desired string within a list.** You can technically have multiple placeholders, depending on how detailed your query needs
+to be, and each placeholder would be added to this list. Technically, since we know there should only be one result, we could use the `.fetchone()` method. This would print each column individually, instead of part of a tuple of column results. Save the file and let's run the same command to print our results.
+```python
+# Query 3 - select only "Queen" from "Artist" table
+cursor.execute('SELECT * FROM "Artist" WHERE "Name" = %s', ["Queen"])
+
+# fetch the result (single)
+results = cursor.fetchone()
+
+# output:
+# 51
+# Queen
+```
