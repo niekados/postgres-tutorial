@@ -394,3 +394,153 @@ from the declarative_base, will now use the .create_all() method from our databa
 # creating the database using declarative_base subclass
 base.metadata.create_all(db)
 ```
+
+---
+
+Now that we have the file set up, we can start to build our class-based models.
+These will be quite similar to how we did them in the last lesson, but this time, we
+get to simply build a normal Python object, that subclasses 'base'.
+
+---
+
+Now that we have the file set up, we can start to build our class-based models.
+These will be quite similar to how we did them in the last lesson, but this time, we
+get to simply build a normal Python object, that subclasses 'base'.
+
+We're going to call our first class '`Artist`', and define the` __tablename__`, wrapped in two
+underscores, which will be set to "Artist" as a string.
+
+---
+**NOTE**
+
+Just a quick note for best practice, when defining your classes in Python, it's best
+to use PascalCase, meaning the first letter of each word is capitalized, and not to use underscores.
+
+---
+
+- As you are well aware, the Artist table has two columns.
+ArtistId which uses the imported Column() class,
+and that's going to be set to an Integer, which will also act as our primary_key.
+Then we have Name, which is the second Column() defined simply as a String.
+The next class-based model we need is for the Album table.
+Again, it's using the base subclass, and this time our tablename will be set to "Album".
+This time we have three columns to define. AlbumId, which will of course be an Integer,
+and is the primary_key for this table. Title, which is simply just a String.
+And ArtistId, which is another Integer, but this time it's a ForeignKey for the Artist
+table, pointing to the ArtistId column.
+Then finally, our third class-based model is for the Track table.
+We'll call it Track, and use the base subclass once again, then give it a tablename of "Track".
+This table consists of 9 different columns, if you recall from our last lesson.
+TrackId, an Integer, will be the primary_key for this table.
+Name, which is a String. AlbumId, an Integer, which is the ForeignKey
+from our Album table, pointing to the AlbumId column.
+MediaTypeId and GenreId, both of which are Integers, but since we have no custom models
+for them on this demo, we'll set those to false as the primary_key.
+Composer, another String. Milliseconds and Bytes, both are Integers
+again, and both will have the primary_key set to false.
+Then finally, UnitPrice, which is a Float. Sometimes you might confuse Float with Decimal,
+but if you're ever in doubt, just be sure to check on the SQLAlchemy documentation under
+the section called "Column and Data Types".
+```python
+# create a class-based model for the "Artist" table
+class Artist(base):
+    __tablename__ = "Artist"
+    ArtistId = Column(Integer, primary_key=True)
+    Name = Column(String)
+
+# create a class-based model for the "Album" table
+class Album(base):
+    __tablename__ = "Album"
+    AlbumId = Column(Integer, primary_key=True)
+    Title = Column(String)
+    ArtistId = Column(Integer, ForeignKey("Artist.ArtistId"))
+    
+class Track(base):
+    __tablename__ = "Track"
+    TrackId = Column(Integer, primary_key=True)
+    Name = Column(String)
+    AlbumId = Column(Integer, ForeignKey("Album.AlbumId"))
+    MediaTypeId = Column(Integer, primary_key=False)
+    GenerId = Column(Integer, primary_key=False)
+    Composer = Column(String)
+    Milliseconds = Column(Integer, primary_key=False)
+    Bytes = Column(Integer, primary_key=False)
+    UnitPrice = Column(Float)
+```
+
+- For query #1, if you recall, we're simply just selecting everything from the Artist table.
+At the bottom of our file, let's create a
+new variable called 'artists', and using our existing 'session' instance, we need to use
+the .query() method to query the Artist class. That should simply select everything on the
+table within the Artist class we defined above. We then need to iterate over the results found,
+and print each of the columns using dot-notation on our for-loop.
+I'm also going to separate each item using the Python separator, and have them split
+using the vertical-bar, or pipe, with a space on either side.
+```python
+# Query 1 - select all records from the "Artist" table
+artists = session.query(Artist)
+for artist in artists:
+    print(artist.ArtistId, artist.Name, sep=" | ")
+```
+- Moving on to query #2, we need to select only the 'Name' column from the Artist table.
+Let's comment-out the first query, since we'll re-use some of the variables below.
+Technically we don't need to, all we need to do is simply make a new print-statement,
+but this is just to keep a nice separation between each query.
+This one is exactly the same as the first one, but this time we only need to print the
+artist.Name here.
+```python
+# Query 2 - select only the "Name" column from the "Artist" table
+artists = session.query(Artist)
+for artist in artists:
+    print(artist.Name)
+```
+- Next up, query #3, we only want to find "Queen" from the Artist table.
+Since we know that we only want to find a single artist, the new variable will be 'artist', singular.
+This time, we can use the .filter_by() method,
+and using the Name column, we'll specify "Queen". Also, since it should technically only return
+one record, we can use the .first() method to only give us the first item from the query,
+just in case more than one result comes back. We're going print each column this time, so
+artist.ArtistId, artist.Name, and once again I'll separate these columns using the Python separator.
+```python
+# Query 3 - select only "Queen" from the "Artist" table
+artist = session.query(Artist).filter_by(Name="Queen").first()
+print(artist.ArtistId, artist.Name, sep=" | ")
+```
+- For query #4, it's exactly the same, but this time we want to filter by the ArtistId for
+Queen, which is 51. Just copy the entire query #3, and change
+the filter from Name, to ArtistId.
+```python
+# Query 4 - select only by "ArtistId" #51 from the "Artist" table
+artist = session.query(Artist).filter_by(ArtistId=51).first()
+print(artist.ArtistId, artist.Name, sep=" | ")
+```
+- On query #5, we need to move over to the Album table this time, and look for any album where
+the ArtistId is 51 for Queen. This time we'll set a new variable of 'albums'
+since there are multiple albums, and use the Album class above, to filter only by the foreign
+key of ArtistId. Let's print each result, for each album in
+the albums list. We'll print all three columns, the AlbumId,
+the Title, and the ArtistId, using the Python separator once again.
+```python
+# Query 5 - select only the albums with "ArtistId" #51 on the "Album" table
+albums = session.query(Album).filter_by(ArtistId=51)
+for album in albums:
+    print(album.AlbumId, album.Title, album.ArtistId, sep=" | ")
+```
+- Query 6
+```python
+# Query 6 - select all tracks where the composer is "Queen" from the "Track" table
+tracks = session.query(Track).filter_by(Composer="Queen")
+for track in tracks:
+    print(
+        track.TrackId,
+        track.Name,
+        track.AlbumId,
+        track.MediaTypeId,
+        track.GenreId,
+        track.Composer,
+        track.Milliseconds,
+        track.Bytes,
+        track.UnitPrice,
+        sep=" | "
+    )
+```
