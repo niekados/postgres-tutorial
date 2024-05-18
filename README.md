@@ -321,3 +321,76 @@ method, and from the Name column, looking for only "Queen".
     # Query 6 - select all tracks where the composer is 'Queen' from the "Track" table
     select_query = track_table.select().where(track_table.c.Composer == "Queen")
 ```
+
+## Using ORM in Python
+
+### Understanding Class Based Models
+Before we start to work with our data, let's discuss and understand what class-based models are, and how they work.
+
+---
+**NOTE**
+
+*A class is a collection of methods that serve a common purpose.*
+Methods themselves should only do one thing, having only one purpose.
+If it starts to do too much, then you should ideally split it into different methods.
+For example, some of the methods we used on the last lesson include `.connect()` for connecting
+to the database, `.select()` for making a selection from the database, and `.execute()` to perform
+the execution of our query. As you can see, each one of these methods
+have a specific duty, only to do exactly what their name entails, nothing more.
+This is just one of the many benefits of using class-based models, as it helps to keep your
+code clean and modular, so you can re-use methods throughout an application without
+repeating yourself. The SQLAlchemy ORM comes with plenty of methods
+that we'll continue to use throughout the next several lessons.
+
+---
+
+### Setup
+
+```python
+from sqlalchemy import (
+    create_engine, Column, Float, ForeignKey, Integer, String
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+```
+
+- create a new variable
+of 'db', and use create_engine to point to our specific database location.
+This tells the application that we're using the Postgres server, on a local host since
+there are 3 slashes, in order to connect to our Chinook database.
+```python
+db = create_engine("postgresql:///chinook")
+```
+
+- Next, we need a variable called 'base', which will be set to the declarative_base() class.
+This new 'base' class will essentially grab the metadata that is produced by our database
+table schema, and creates a subclass to map everything back to us here within the 'base' variable.
+```python
+base = declarative_base()
+```
+
+- Then, let's create a new variable of 'Session', making sure to use a capital 'S' here.
+This Session variable will instantiate the sessionmaker() class from the ORM, making
+a new instance of the sessionmaker, and point to our 'db' engine variable in order to use
+the database. There are some additional complexities that
+we won't get into here, but in order to connect to the database, we have to call Session()
+and open an actual session. To do that, we need another variable called
+'session', but this time using a lowercase 's', and we set that to equal the new instance
+of the Session() from above.
+Both of these concepts, using the declarative_base and sessionmaker, are using the highest layer
+of abstraction versus how we did this with the Expression Language.
+```python
+# instead of connecting to the database directly, we will ask for a session
+# create a new instance of sessionmaker, then point to our engine (the db)
+Session = sessionmaker(db)
+# opens an actual session by calling the session() sublass defined above
+session = Session()
+```
+
+- The last thing we need to do before we can work with our database, is to actually create
+the database subclass and generate all metadata. The base variable, given that it's a subclass
+from the declarative_base, will now use the .create_all() method from our database metadata.
+```python
+# creating the database using declarative_base subclass
+base.metadata.create_all(db)
+```
