@@ -544,3 +544,95 @@ for track in tracks:
         sep=" | "
     )
 ```
+
+## CRUD
+
+### C - Create
+
+```python
+# create a class-based model for "Programmer" table
+class Programmer(base):
+    __tablename__ = "Programmer"
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    gender = Column(String)
+    nationality = Column(String)
+    famous_for = Column(String)
+```
+
+```python
+# creating records on our Programmer table
+ada_lovelace = Programmer(
+    first_name = "Ada",
+    last_name = "Lovelace",
+    gender = "F",
+    nationality = "British",
+    famous_for = "First Programmer"
+)
+```
+
+```python
+# add each instance of our programmers to our session
+session.add(ada_lovelace)
+```
+
+```python
+# commit our session to the database
+session.commit()
+```
+---
+**NOTE**
+
+The lovely thing about using the ORM and sessions, is that the formatting for adding records
+is quite similar to using Git when pushing files to GitHub.
+For example, add this file, and then commit it, in the exact same way we added Ada to
+the session, and then committed that session.
+
+---
+
+```python
+alan_turing = Programmer(
+    first_name = "Alan",
+    last_name = "Turing",
+    gender = "M",
+    nationality = "British",
+    famous_for = "Modern Computing"
+)
+```
+---
+**NOTE**
+
+Before we start to add and commit Alan to the database, we need to comment-out the session
+for Ada, otherwise this will create a second record for her.
+We're not going to commit this session just yet, so let's move on to adding a few more programmers.
+
+---
+
+```python
+# add each instance of our programmers to our session
+# session.add(ada_lovelace)
+session.add(alan_turing)
+```
+
+### R - Read
+
+Before we start to add more Programmers to our table, let's make sure that Ada is added correctly.
+This is where the '`R`' in CRUD comes back into
+action, as you've seen in our previous lessons, so this part should be familiar to you by now.
+We'll create a new variable to find all 'programmers',
+and then use the session to query our Programmer table.
+
+```python
+# query the database to find all Programmers
+programmers = session.query(Programmer)
+for programmer in programmers:
+    print(
+        programmer.id,
+        programmer.first_name + " " + programmer.last_name,
+        programmer.gender,
+        programmer.nationality,
+        programmer.famous_for,
+        sep=" | "
+    )
+```
