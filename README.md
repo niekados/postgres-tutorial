@@ -636,3 +636,147 @@ for programmer in programmers:
         sep=" | "
     )
 ```
+
+### U - Update
+
+#### Update Single Record
+Let's create a new variable of "`programmer`",
+and set that to our normal `session.query()` on the Programmer table.
+This time, however, we need to include the `.filter_by()` method.
+
+```python
+# updating a single record
+programmer = session.query(Programmer).filter_by(id=7).first()
+```
+
+*In some cases, your records might actually have very similar data, such as the same first
+or last name. As you can see, I share the same first name
+as Tim Berners-Lee, so filtering by first name is not practical.*
+
+Ideally, we always want to try to use something unique with data retrieval, and that's precisely
+where our `primary_key` is most helpful on a relational database.
+If you've been following along exactly on the previous lesson, then your own record
+should have the `primary_key` of number 7. 
+
+---
+**NOTE**
+
+Since we only want one specific record, it's
+important to be sure to add the `.first()` method at the end of our query.
+If you don't add the .first() method, then you'll have to use a for-loop to iterate over
+the query list, even though it'll only find a single record using that ID.
+
+---
+
+Once we've finished defining the query, we can simply use that 'programmer' variable
+and then define which columns need updating. In this case, let's go ahead and update our
+column of 'famous_for', and set that equal to "World President".
+
+```python
+# updating a single record
+programmer = session.query(Programmer).filter_by(id=7).first()
+programmer.famous_for = "World President"
+```
+
+Then we need to commit this session. `session.commit()`
+```python 
+session.commit()
+```
+
+#### Update Multiple Records
+
+This will be our standard query for all records on the Programmer table.
+Our goal here is to update everybody's record at the same time, so we need to iterate over
+each record using a for-loop. For each person in our list of people, if
+the person.gender is equal to 'F', then we want to update the gender to 'Female'.
+Otherwise, if the person.gender is equal to 'M', then we need to update the gender to 'Male'.
+After those are sorted, we need a closing
+else-statement, which we'll just print "Gender not defined".
+We also need to commit each update within this loop, and this doesn't need to be within
+any conditional check, it just needs to be part of the loop itself.
+
+```python
+# updating multiple records
+people = session.query(Programmer)
+for person in people:
+    if person.gender == "F":
+        person.gender = "Female"
+    elif person.gender == "M":
+        person.gender = "Male"
+    else:
+        print("Gender not defined")
+        session.commit()
+```
+
+### D - Delete
+
+
+#### Deleting a single record
+In order to delete a particular record, we
+first need to identify which record to delete. Normally it's best to use something unique,
+such as the `primary_key`, in order to target a specific record for deletion.
+However, from a user perspective, we might not always know a record's ID, as that might
+be visible only to the developer. What we can do is use some Python `input()`
+fields, and prompt the user to find a specific person from our table.
+Since some records might have the same first or last name, let's ask for both names, and
+assign them to 'fname' and 'lname' respectively.
+Then, using the data found from those inputs, we can programmatically confirm deletion of
+this record. We need to query the Programmer table, and
+using the `.filter_by()` method, we can simply plug-in those two variables.
+
+Then, we need to think about defensive programming to double-check that it's the correct programmer
+being found. Let's confirm this by printing the first and
+last name, if the programmer variable is not None.
+Otherwise, if there are no results found, then we'll simply print "No records found".
+If there is a programmer found, then within the if-statement, we want to confirm if the
+user actually wants to delete this record permanently.
+This will be assigned to a new variable of "confirmation".
+All we care about is whether or not the response is 'y' for confirmation to delete it, so a
+simple check on the value using the .lower() method is all we need.
+If there is not a match to confirm deletion, then we can just print "Programmer not deleted".
+
+```python
+# deleting a single record
+fname = input("Enter a first name: ")
+lname = input("Enter a last name: ")
+programmer = session.query(Programmer).filter_by(first_name=fname, last_name=lname).first()
+# defensive programming
+if programmer is not None:
+    print("Programmer Found: ", programmer.first_name + " " + programmer.last_name)
+    confirmation = input("Are you sure you want to delete this record? (y/n)")
+    if confirmation.lower() == "y":
+        session.delete(programmer)
+        session.commit()
+        print("Programmer has been deleted")
+    else:
+        print("Programmer not deleted")
+else:
+    print("No records found")
+```
+
+#### Deleting multiple records
+
+---
+**NOTE**
+
+This final part will not be done, so do not
+repeat this section, as it's purely for demonstration purposes only.
+
+---
+
+If you simply just wanted to delete all records on this table, instead of just a single record,
+then it would look something like this.
+Fairly simple, we find all records from the Programmer table, and iterate over each one
+individually to delete and commit the record. Only perform this if you're absolutely certain
+you want to delete all records, and make sure, if using this in a real-world scenario, to
+use defensive programming to confirm deletion first.
+
+
+```python
+# deleting multiple records (just a rough example, do not execute this code)
+# delete multiple/all records
+programmers = session.query(Programmer)
+for programmer in programmers:
+    session.delete(programmer)
+    session.commit()
+```
